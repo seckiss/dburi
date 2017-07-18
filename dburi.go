@@ -56,7 +56,7 @@ func (dbUri *DbUri) Open() (*sql.DB, error) {
 }
 
 func (dbUri *DbUri) OpenMaintenanceDb() (*sql.DB, error) {
-	mnt, err := NewDbUri(dbUri.Host, dbUri.Port, "postgres", dbUri.User, "")
+	mnt, err := New(dbUri.Host, dbUri.Port, "postgres", dbUri.User, "")
 	if err != nil {
 		return nil, err
 	}
