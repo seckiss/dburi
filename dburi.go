@@ -18,7 +18,7 @@ type DbUri struct {
 }
 
 // if password is empty take password from env var
-func NewDbUri(host, port, name, user, password string) (dbUri *DbUri, err error) {
+func New(host, port, name, user, password string) (dbUri *DbUri, err error) {
 	if password == "" {
 		password = os.Getenv("PGPASSWORD")
 		if password == "" {
