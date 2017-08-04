@@ -10,27 +10,27 @@ import (
 )
 
 type DbUri struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Name     string
+	Host string
+	Port string
+	User string
+	Pass string
+	Name string
 }
 
 // if password is empty take password from env var
-func New(host, port, name, user, password string) (dbUri *DbUri, err error) {
-	if password == "" {
-		password = os.Getenv("PGPASSWORD")
-		if password == "" {
+func New(host, port, name, user, pass string) (dbUri *DbUri, err error) {
+	if pass == "" {
+		pass = os.Getenv("PGPASSWORD")
+		if pass == "" {
 			return nil, fmt.Errorf("PGPASSWORD not present in env vars")
 		}
 	}
-	return &DbUri{host, port, user, password, name}, nil
+	return &DbUri{host, port, user, pass, name}, nil
 }
 
 // stringify to dbname URI
 func (dbUri *DbUri) String() string {
-	uri := "postgresql://" + dbUri.User + ":" + dbUri.Password + "@" + dbUri.Host + ":" + dbUri.Port + "/" + dbUri.Name + "?"
+	uri := "postgresql://" + dbUri.User + ":" + dbUri.Pass + "@" + dbUri.Host + ":" + dbUri.Port + "/" + dbUri.Name + "?"
 	if dbUri.Host == "127.0.0.1" || dbUri.Host == "localhost" {
 		uri += "sslmode=disable&"
 	} else {
