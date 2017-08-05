@@ -3,7 +3,6 @@ package dburi
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"os/exec"
 
 	"github.com/lib/pq"
@@ -18,14 +17,8 @@ type DbUri struct {
 }
 
 // if password is empty take password from env var
-func New(host, port, name, user, pass string) (dbUri *DbUri, err error) {
-	if pass == "" {
-		pass = os.Getenv("PGPASSWORD")
-		if pass == "" {
-			return nil, fmt.Errorf("PGPASSWORD not present in env vars")
-		}
-	}
-	return &DbUri{host, port, user, pass, name}, nil
+func New(host, port, name, user, pass string) (dbUri *DbUri) {
+	return &DbUri{host, port, user, pass, name}
 }
 
 // stringify to dbname URI
@@ -56,10 +49,7 @@ func (dbUri *DbUri) Open() (*sql.DB, error) {
 }
 
 func (dbUri *DbUri) OpenMaintenanceDb() (*sql.DB, error) {
-	mnt, err := New(dbUri.Host, dbUri.Port, "postgres", dbUri.User, "")
-	if err != nil {
-		return nil, err
-	}
+	mnt := New(dbUri.Host, dbUri.Port, "postgres", dbUri.User, dbUri.Pass)
 	return mnt.Open()
 }
 
