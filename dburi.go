@@ -55,30 +55,30 @@ func (dbUri *DbUri) OpenMaintenanceDb() (*sql.DB, error) {
 
 func (dbUri *DbUri) CreateDb(dbname string) (err error) {
 	mntDb, err := dbUri.OpenMaintenanceDb()
-	defer mntDb.Close()
 	if err != nil {
 		return err
 	}
+	defer mntDb.Close()
 	_, err = mntDb.Exec("create database " + dbname)
 	return err
 }
 
 func (dbUri *DbUri) DropDb(dbname string) (err error) {
 	mntDb, err := dbUri.OpenMaintenanceDb()
-	defer mntDb.Close()
 	if err != nil {
 		return err
 	}
+	defer mntDb.Close()
 	_, err = mntDb.Exec("drop database if exists " + dbname)
 	return err
 }
 
 func (dbUri *DbUri) KillPglogicalBackends() (err error) {
 	mntDb, err := dbUri.OpenMaintenanceDb()
-	defer mntDb.Close()
 	if err != nil {
 		return err
 	}
+	defer mntDb.Close()
 	cmd := "SELECT pg_terminate_backend(pid) FROM pg_stat_activity where application_name like 'pglogical%';"
 	_, err = mntDb.Exec(cmd)
 	return err
