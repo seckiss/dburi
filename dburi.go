@@ -4,9 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"os/exec"
+    "regexp"
 
 	"github.com/lib/pq"
 )
+
+
+var validDbname = regexp.MustCompile(`^\w+$`)
+
+func validateDbname(dbname string) {
+    if !validDbname.MatchString(dbname) {
+        panic(fmt.Errorf("DB name %s is not valid", dbname))
+    }
+}
 
 type DbUri struct {
 	Host string
@@ -18,8 +28,10 @@ type DbUri struct {
 
 // if password is empty take password from env var
 func New(host, port, name, user, pass string) (dbUri *DbUri) {
+    validateDbname(name)
 	return &DbUri{host, port, user, pass, name}
 }
+
 
 // stringify to dbname URI
 func (dbUri *DbUri) String() string {
@@ -54,6 +66,7 @@ func (dbUri *DbUri) OpenMaintenanceDb() (*sql.DB, error) {
 }
 
 func (dbUri *DbUri) CreateDb(dbname string) (err error) {
+    validateDbname(dbname)
 	mntDb, err := dbUri.OpenMaintenanceDb()
 	if err != nil {
 		return err
@@ -64,6 +77,7 @@ func (dbUri *DbUri) CreateDb(dbname string) (err error) {
 }
 
 func (dbUri *DbUri) DropDb(dbname string) (err error) {
+    validateDbname(dbname)
 	mntDb, err := dbUri.OpenMaintenanceDb()
 	if err != nil {
 		return err
@@ -72,6 +86,21 @@ func (dbUri *DbUri) DropDb(dbname string) (err error) {
 	_, err = mntDb.Exec("drop database if exists " + dbname)
 	return err
 }
+
+func (dbUri *DbUri) ExistsDb(dbname string) (exists bool, err error) {
+    validateDbname(dbname)
+	mntDb, err := dbUri.OpenMaintenanceDb()
+	if err != nil {
+		return false, err
+	}
+	defer mntDb.Close()
+    count, err := GetIntValue(mntDb, "select count(*) from pg_database where datname=$1", dbname)
+    if err != nil {
+        return false, err
+    }
+    return count > 0, nil
+}
+
 
 func (dbUri *DbUri) KillPglogicalBackends() (err error) {
 	mntDb, err := dbUri.OpenMaintenanceDb()
